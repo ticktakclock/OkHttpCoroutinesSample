@@ -1,7 +1,8 @@
-package com.github.ticktakclock.okhttpcoroutines
+package com.github.ticktakclock.okhttpcoroutines.view.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.github.ticktakclock.okhttpcoroutines.R
 
 class MainActivity : AppCompatActivity() {
 
