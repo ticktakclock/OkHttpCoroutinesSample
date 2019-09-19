@@ -1,7 +1,6 @@
 package com.github.ticktakclock.okhttpcoroutines.view.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,14 +12,25 @@ import androidx.lifecycle.ViewModelProviders
 import com.github.ticktakclock.okhttpcoroutines.R
 import com.github.ticktakclock.okhttpcoroutines.databinding.RepoListFragmentBinding
 import com.github.ticktakclock.okhttpcoroutines.service.ProjectRepository
+import com.github.ticktakclock.okhttpcoroutines.service.model.Project
 import com.github.ticktakclock.okhttpcoroutines.viewmodel.ProjectListViewModel
 
 
-class ProjectListFragment : Fragment() {
+class ProjectListFragment(private val projectRepository: ProjectRepository) : Fragment() {
 
     companion object {
-        fun newInstance() = ProjectListFragment()
+        @JvmStatic
+        fun newInstance(projectRepository: ProjectRepository) =
+            ProjectListFragment(projectRepository)
     }
+
+    private var _fragmentInteractionListener: FragmentInteractionListener? = null
+
+    var fragmentInteractionListener: FragmentInteractionListener?
+        get() = _fragmentInteractionListener
+        set(value) {
+            _fragmentInteractionListener = value
+        }
 
     private lateinit var viewModel: ProjectListViewModel
     private lateinit var binding: RepoListFragmentBinding
@@ -36,10 +46,21 @@ class ProjectListFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this, ProjectListViewModel.Factory(ProjectRepository()))
+        viewModel = ViewModelProviders.of(this, ProjectListViewModel.Factory(projectRepository))
             .get(ProjectListViewModel::class.java)
         binding.viewModel = viewModel
-        binding.recyclerView.adapter = ProjectsAdapter(emptyList())
+        val adapter = object : ProjectsAdapter(emptyList()) {
+            override fun onProjectClicked(project: Project) {
+                super.onProjectClicked(project)
+                val userName = project.owner?.login
+                if (userName != null) {
+                    fragmentInteractionListener?.moveToUser(userName)
+                }
+            }
+        }
+
+        binding.recyclerView.adapter = adapter
+
         binding.floatingActionButton.setOnClickListener { v ->
             observeViewModel(viewModel)
         }
@@ -53,11 +74,10 @@ class ProjectListFragment : Fragment() {
             }
             val adapter = binding.recyclerView.adapter as? ProjectsAdapter
             adapter?.update(it)
-            it.forEach { project ->
-                Log.d("fragment", project.name)
-            }
         })
     }
 
-
+    interface FragmentInteractionListener {
+        fun moveToUser(userName: String)
+    }
 }

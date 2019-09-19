@@ -9,7 +9,7 @@ import com.github.ticktakclock.okhttpcoroutines.databinding.ProjectsItemBinding
 import com.github.ticktakclock.okhttpcoroutines.service.model.Project
 
 
-class ProjectsAdapter(private var projects: List<Project>) :
+open class ProjectsAdapter(private var projects: List<Project>) :
     RecyclerView.Adapter<ProjectsAdapter.ProjectsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectsViewHolder {
@@ -25,6 +25,13 @@ class ProjectsAdapter(private var projects: List<Project>) :
         if (position >= projects.size) return
         val project = projects[position]
         holder.bind(project)
+        holder.item.setOnClickListener {
+            onProjectClicked(project)
+        }
+    }
+
+    open fun onProjectClicked(project: Project) {
+
     }
 
     fun update(items: List<Project>) {
@@ -34,6 +41,8 @@ class ProjectsAdapter(private var projects: List<Project>) :
 
     class ProjectsViewHolder(private val binding: ProjectsItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
+        val item = binding.item
 
         fun bind(item: Project) {
             binding.project = item
